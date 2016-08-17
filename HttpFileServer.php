@@ -217,20 +217,25 @@ class HttpFileServer {
     }
 
     /**
-     * Handle GET requests - otuput a file to client
+     * Handle GET requests - output a file to client
      * @throws HttpFileServerException
      */
     protected function handleGet() {
         $filename = $this->filename;
-
-        if (!file_exists($filename) ||  !is_file($filename))
+      
+        if (!file_exists($filename) ||  !is_file($filename)){
             throw new HttpFileServerException('Not found', 404, 'Could not find file ' . $this->rel_filename);
-
+        }
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
+        header('Content-type: '.finfo_file($finfo, $filename));
         header('Content-Length: ' . filesize($filename));
         readfile($filename);
+        finfo_close($finfo);
+  
     }
 
     /**
